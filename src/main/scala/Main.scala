@@ -13,7 +13,7 @@ import org.cloudera.spark.streaming.kafka.KafkaWriter._
 object Main{
   def main(args: Array[String]) {
     val master = "spark://cruncher:7077"
-    val appName = "SS7MLPreprocessAnalysis"
+    val appName = "SS7MLPreprocess"
 
     val conf = new SparkConf()
     conf.setAppName(appName)
