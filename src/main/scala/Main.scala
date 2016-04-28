@@ -22,32 +22,39 @@ object Main{
 
     // Elasticsearch configuration.
     conf.set("es.index.auto.create", "true")
+    val topics = Set("ss7-raw-input")
 
     val sc = new SparkContext(conf)
     val ssc = new StreamingContext(sc, Seconds(10))
 
+    //Kafka input configuration
     val kafkaParams = Map[String,String]("metadata.broker.list" -> "localhost:9092")
-    val topics = Set("ss7-raw-input")
 
+    //Kafka output configuration
     val kafkaOutParams = new Properties()
     kafkaOutParams.put("bootstrap.servers","localhost:9092")
     kafkaOutParams.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer")
     kafkaOutParams.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer")
 
     val kafkaSink = sc.broadcast(KafkaSink(kafkaOutParams))
+
+    //Used to create timing features
     var prevLocUpdate: LocationUpdate = LocationUpdate()
 
+    //Stream messages from Kafka: network capture
     KafkaUtils.createDirectStream[String,String,StringDecoder,StringDecoder](ssc, kafkaParams, topics)
       .flatMap(_._2.split("\n")).foreachRDD(ss7Record => {
         val ss7Input = ss7Record.collect()
-
         ss7Input.foreach(input => {
           val line = input.split(",")
           val mapMessage = line(4)
+
+          //Only interested in updateLocation requests
           if(mapMessage.contains("invoke updateLocation") && !mapMessage.contains("returnResultLast")) {
             val imsi = line(13)
-            if(imsi == "24201111111110") {
 
+            //Looking for location updates for the VIP subscriber
+            if(imsi == "24201111111110") {
               val timeEpoch = line(0).trim.toDouble
               val byteLength = line(3).trim.toDouble
               val lastUpdate = timeEpoch - prevLocUpdate.timeEpoch
@@ -68,9 +75,11 @@ object Main{
                 "newLac" -> newLac.toString
               )
 
+              //Store preprocessed values in elasticsearch for further analysis and visualization
               val preProcRDD = sc.makeRDD(Seq(preProcessed))
               preProcRDD.saveToEs("ss7-preprocessed/preprocessed")
 
+              //Send preprocessed data on Kafka for ML analysis
               val kafkaOutString = timeEpoch.toString + "," + byteLength.toString + "," + lastUpdate.toString + "," + travelDist.toString + "," + newLac.toString
               kafkaSink.value.send("ss7-preprocessed", kafkaOutString)
             }
