@@ -1,4 +1,4 @@
-name := "ss7-ml-preprocess-analysis"
+name := "ss7-ml-preprocess"
 
 version := "0.1-SNAPSHOT"
 
