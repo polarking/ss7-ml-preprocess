@@ -1,4 +1,4 @@
-import java.util.Properties
+import java.util.{Date, Properties}
 
 import kafka.serializer.StringDecoder
 import org.apache.spark.SparkContext
@@ -67,16 +67,18 @@ object Main{
 
               prevLocUpdate = LocationUpdate(timeEpoch, byteLength, travelDist, lastUpdate, newLac)
 
-              val preProcessed = Map[String, String](
-                "timeEpoch" -> timeEpoch.toString,
-                "byteLength" -> byteLength.toString,
-                "lastUpdate" -> lastUpdate.toString,
-                "travelDist" -> travelDist.toString,
-                "newLac" -> newLac.toString
+              val preProcessedDate = Map("timeEpoch" -> new Date(timeEpoch.toInt * 1000L))
+              val preProcessedInt = Map(
+                "byteLength" -> byteLength.toInt,
+                "newLac" -> newLac
+              )
+              val preProcessedDouble = Map(
+                "lastUpdate" -> lastUpdate,
+                "travelDist" -> travelDist
               )
 
               //Store preprocessed values in elasticsearch for further analysis and visualization
-              val preProcRDD = sc.makeRDD(Seq(preProcessed))
+              val preProcRDD = sc.makeRDD(Seq(preProcessedDate, preProcessedInt, preProcessedDouble))
               preProcRDD.saveToEs("ss7-preprocessed/preprocessed")
 
               //Send preprocessed data on Kafka for ML analysis
