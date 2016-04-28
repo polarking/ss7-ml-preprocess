@@ -47,11 +47,6 @@ object Main{
           if(mapMessage.contains("invoke updateLocation") && !mapMessage.contains("returnResultLast")) {
             val imsi = line(13)
             if(imsi == "24201111111110") {
-              println("------------------------------------------")
-              println("Input length: " + (ss7Input.length / 16) + " ... ")
-              println("Map Message: " + mapMessage)
-              println("IMSI: " + imsi)
-              println("LAC: " + line(15).trim)
 
               val timeEpoch = line(0).trim.toDouble
               val byteLength = line(3).trim.toDouble
@@ -64,9 +59,6 @@ object Main{
                   travelDistance(newLac, prevLocUpdate.prevLac)
 
               prevLocUpdate = LocationUpdate(timeEpoch, byteLength, travelDist, lastUpdate, newLac)
-
-              println("PrevLocUpdate: " + prevLocUpdate)
-              println("------------------------------------------")
 
               val preProcessed = Map[String, String](
                 "timeEpoch" -> timeEpoch.toString,
