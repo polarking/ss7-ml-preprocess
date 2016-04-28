@@ -94,14 +94,4 @@ object Main{
 
     LAC.getDistance(pLac.toString + "-" + nLac.toString)
   }
-
-  def mergeImsi(imsiArr: Array[String]): Option[String] = {
-    var corrImsi: String = ""
-    imsiArr.foreach(imsi => if(!imsi.contains("%")) corrImsi = imsi)
-
-    if(corrImsi != "")
-      Some(corrImsi)
-    else
-      None
-  }
 }
