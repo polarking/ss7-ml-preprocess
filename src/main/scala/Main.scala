@@ -12,8 +12,11 @@ import org.cloudera.spark.streaming.kafka.KafkaWriter._
 
 object Main{
   def main(args: Array[String]) {
-    val master = "spark://cruncher:7077"
+    val master = args(0)
     val appName = "SS7MLPreprocess"
+
+    val user = args(1)
+    val pass = args(2)
 
     val conf = new SparkConf()
     conf.setAppName(appName)
@@ -21,7 +24,11 @@ object Main{
     conf.set("spark.cores.max", "8")
 
     // Elasticsearch configuration.
+    conf.set("es.resource", "ss7-ml-preprocessed/preprocessed")
     conf.set("es.index.auto.create", "true")
+    conf.set("es.net.http.auth.user", user)
+    conf.set("es.net.http.auth.pass", pass)
+
     val topics = Set("ss7-raw-input")
 
     val sc = new SparkContext(conf)
@@ -40,6 +47,9 @@ object Main{
 
     //Used to create timing features
     var prevLocUpdate: LocationUpdate = LocationUpdate()
+
+    //Increment to identify feature set
+    var label = 0
 
     //Stream messages from Kafka: network capture
     KafkaUtils.createDirectStream[String,String,StringDecoder,StringDecoder](ssc, kafkaParams, topics)
@@ -67,23 +77,24 @@ object Main{
 
               prevLocUpdate = LocationUpdate(timeEpoch, byteLength, travelDist, lastUpdate, newLac)
 
-              val preProcessedDate = Map("timeEpoch" -> new Date(timeEpoch.toInt * 1000L))
-              val preProcessedInt = Map(
+              val preProcessedDate = Map(
+                "timeEpoch" -> new Date(timeEpoch.toInt * 1000L),
                 "byteLength" -> byteLength.toInt,
-                "newLac" -> newLac
-              )
-              val preProcessedDouble = Map(
+                "newLac" -> newLac,
                 "lastUpdate" -> lastUpdate,
-                "travelDist" -> travelDist
+                "travelDist" -> travelDist,
+                "label" -> label
               )
 
               //Store preprocessed values in elasticsearch for further analysis and visualization
-              val preProcRDD = sc.makeRDD(Seq(preProcessedDate, preProcessedInt, preProcessedDouble))
-              preProcRDD.saveToEs("ss7-preprocessed/preprocessed")
+              val preProcRDD = sc.makeRDD(Seq(preProcessedDate))
+              preProcRDD.saveToEs("ss7-ml-preprocessed/preprocessed")
 
               //Send preprocessed data on Kafka for ML analysis
-              val kafkaOutString = timeEpoch.toString + "," + byteLength.toString + "," + lastUpdate.toString + "," + travelDist.toString + "," + newLac.toString
+              val kafkaOutString = label.toString + "," + byteLength.toString + "," + lastUpdate.toString + "," + travelDist.toString + "," + newLac.toString
               kafkaSink.value.send("ss7-preprocessed", kafkaOutString)
+
+              label += 1
             }
           }
         })
