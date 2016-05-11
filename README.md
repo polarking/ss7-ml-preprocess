@@ -13,6 +13,7 @@ ss7-preprocessed.
 ## Instructions
 It is a requirement that both Elasticsearch and Apache Kafka is running on
 localhost. The application expects the following command line arguments:
+
 1. URL of the Spark master. In the form spark://host:port.
 2. Username for the Elasticsearch cluster.
 3. Password for the Elasticsearch cluster.
