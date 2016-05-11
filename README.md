@@ -29,3 +29,13 @@ bin/spark-submit \
   [Elasticsearch username] \
   [Elasticsearch password]
 ```
+
+## Build
+The project uses sbt as its build tool, to compile use the assembly plugin to
+build the plugin:
+
+```bash
+sbt assembly
+```
+
+This creates a fat jar that resolves all dependencies required by Spark.
