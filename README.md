@@ -18,7 +18,7 @@ localhost. The application expects the following command line arguments:
 2. Username for the Elasticsearch cluster.
 3. Password for the Elasticsearch cluster.
 
-The application can be started be using spark-submit:
+The application can be started using spark-submit:
 
 ```bash
 bin/spark-submit \
