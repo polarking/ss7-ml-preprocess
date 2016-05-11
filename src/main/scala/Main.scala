@@ -9,7 +9,6 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka._
 import org.cloudera.spark.streaming.kafka.KafkaWriter._
 
-
 object Main{
   def main(args: Array[String]) {
     val master = args(0)
@@ -21,7 +20,6 @@ object Main{
     val conf = new SparkConf()
     conf.setAppName(appName)
     conf.setMaster(master)
-    conf.set("spark.cores.max", "8")
 
     // Elasticsearch configuration.
     conf.set("es.resource", "ss7-ml-preprocessed/preprocessed")
