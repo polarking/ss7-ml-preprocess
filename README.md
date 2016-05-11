@@ -31,7 +31,7 @@ bin/spark-submit \
 ```
 
 ## Build
-The project uses sbt as its build tool. To compile the project use the assembl plugin:
+The project uses sbt as its build tool. To compile the project use the assembly plugin:
 
 ```bash
 sbt assembly
