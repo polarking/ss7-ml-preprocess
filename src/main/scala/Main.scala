@@ -2,12 +2,10 @@ import java.util.{Date, Properties}
 
 import kafka.serializer.StringDecoder
 import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.elasticsearch.spark._
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka._
-import org.cloudera.spark.streaming.kafka.KafkaWriter._
 
 object Main{
   /**
