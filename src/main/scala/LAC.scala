@@ -1,5 +1,5 @@
 /**
-  * Created by kristoffer on 25.04.2016.
+  * Provides some helper functions used to handle LACs.
   */
 object LAC {
   val lacDistanceMap = Map[String, Int](
@@ -21,13 +21,27 @@ object LAC {
     "6593-6593" -> 127
   )
 
+  /**
+    * Provides a metric for the distance between two LACs.
+    * @param lacToFrom The two LACs which will be checked, in the form xxxx-yyyy.
+    * @return The distance between two LACs.
+    */
   def getDistance(lacToFrom: String): Int = {
     val toFrom = lacToFrom.split("-")
-    if(toFrom(0) == toFrom(1)) 10
-    else if(!lacDistanceMap.contains(lacToFrom)) 10
+    if(toFrom(0) == toFrom(1))
+      if(toFrom(0) == "6593" || toFrom(1) == "6593") 185
+      else 10
+    else if(!lacDistanceMap.contains(lacToFrom))
+      if(toFrom(0) == "6593" || toFrom(1) == "6593") 183
+      else 9
     else lacDistanceMap(lacToFrom)
   }
 
+  /**
+    * Decodes a hex LAC in the form xx:yy to an integer.
+    * @param lac The hex LAC to decode.
+    * @return The LAC as an Int.
+    */
   def lacDecode(lac: String): Int = {
     val split = lac.split(":")
     val lacDec = split(0) + split(1)

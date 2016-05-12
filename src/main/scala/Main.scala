@@ -10,6 +10,10 @@ import org.apache.spark.streaming.kafka._
 import org.cloudera.spark.streaming.kafka.KafkaWriter._
 
 object Main{
+  /**
+    * Main entry point to the application.
+    * @param args The command line arguments.
+    */
   def main(args: Array[String]) {
     val master = args(0)
     val appName = "SS7MLPreprocess"
@@ -27,7 +31,7 @@ object Main{
     conf.set("es.net.http.auth.user", user)
     conf.set("es.net.http.auth.pass", pass)
 
-    val topics = Set("ss7-raw-input")
+    val topics = Set("ss7-raw-input") //Topic name for Kafka.
 
     val sc = new SparkContext(conf)
     val ssc = new StreamingContext(sc, Seconds(10))
@@ -41,7 +45,7 @@ object Main{
     kafkaOutParams.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer")
     kafkaOutParams.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer")
 
-    val kafkaSink = sc.broadcast(KafkaSink(kafkaOutParams))
+    val kafkaSink = sc.broadcast(KafkaSink(kafkaOutParams)) //Sink used to send messages to Kafka.
 
     //Used to create timing features
     var prevLocUpdate: LocationUpdate = LocationUpdate()
@@ -68,7 +72,7 @@ object Main{
               val lastUpdate = timeEpoch - prevLocUpdate.timeEpoch
               val newLac = LAC.lacDecode(line(15).trim)
               val travelDist =
-                if (prevLocUpdate.prevLac == 0.0)
+                if (prevLocUpdate.prevLac == 0.0) //If it's the first read updateLocation.
                   travelDistance(newLac, newLac)
                 else
                   travelDistance(newLac, prevLocUpdate.prevLac)
@@ -102,6 +106,12 @@ object Main{
     ssc.awaitTermination()
   }
 
+  /**
+    * Provides a metric for the distance traveled between two LACs by the subscriber.
+    * @param prevLac The previous known location.
+    * @param newLac The new known location.
+    * @return Distance traveled by the subscriber.
+    */
   def travelDistance(prevLac: Int, newLac: Int): Int = {
     var pLac = prevLac
     var nLac = newLac
