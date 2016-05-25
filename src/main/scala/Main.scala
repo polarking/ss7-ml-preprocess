@@ -91,7 +91,7 @@ object Main{
               preProcRDD.saveToEs("ss7-ml-preprocessed/preprocessed")
 
               //Send preprocessed data on Kafka for ML analysis
-              val kafkaOutString = label.toString + "," + byteLength.toString + "," + lastUpdate.toString + "," + travelDist.toString + "," + newLac.toString
+              val kafkaOutString = timeEpoch.toString + "," + label.toString + "," + byteLength.toString + "," + lastUpdate.toString + "," + travelDist.toString + "," + newLac.toString
               kafkaSink.value.send("ss7-preprocessed", kafkaOutString)
 
               label += 1
