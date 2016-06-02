@@ -31,8 +31,10 @@ object Main{
 
     val topics = Set("ss7-raw-input") //Topic name for Kafka.
 
+    val batchDuration = 10
+
     val sc = new SparkContext(conf)
-    val ssc = new StreamingContext(sc, Seconds(10))
+    val ssc = new StreamingContext(sc, Seconds(batchDuration))
 
     //Kafka input configuration
     val kafkaParams = Map[String,String]("metadata.broker.list" -> "localhost:9092")
@@ -83,6 +85,7 @@ object Main{
                 "newLac" -> newLac,
                 "lastUpdate" -> lastUpdate,
                 "travelDist" -> travelDist,
+                "frequency" -> ss7Record.count / batchDuration,
                 "label" -> label
               )
 
